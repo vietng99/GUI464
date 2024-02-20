@@ -142,36 +142,55 @@ def update_data_log(action, freq='N/A', duty_cycle='N/A'):
 
 
 def start_command():
-    global stopwatch_running, start_time, elapsed_time
+    global ser, stopwatch_running, start_time, elapsed_time
     if not stopwatch_running:
         stopwatch_running = True
         # Adjust start_time to account for already elapsed time if any
-        start_time = time.time() - elapsed_time
+        start_time = time.time()
         update_stopwatch_display()
     # Log the start action
     freq = config_storage.get('frequency', 'N/A')
     duty_cycle = config_storage.get('duty_cycle', 'N/A')
     update_data_log('start', freq, duty_cycle)
 
+    #ser
+    if ser is not None and ser.is_open:
+        ser.write("START\n".encode())
+    else:
+        print("Serial port is not open.")
+
 def stop_command():
-    global stopwatch_running, elapsed_time, start_time
+    global ser, stopwatch_running, elapsed_time, start_time
     if stopwatch_running:
         # Calculate and update elapsed_time based on the current period
         elapsed_time += time.time() - start_time
         stopwatch_running = False
         # Reset start_time to None to avoid using stale value
         start_time = None
+
+    #ser
+    if ser is not None and ser.is_open:
+        ser.write("STOP\n".encode())
+    else:
+        print("Serial port is not open.")
+
     # Log the stop action
     freq = config_storage.get('frequency', 'N/A')
     duty_cycle = config_storage.get('duty_cycle', 'N/A')
     update_data_log('stop', freq, duty_cycle)
 
 def reset_command():
-    global elapsed_time, start_time, stopwatch_running
+    global ser, elapsed_time, start_time, stopwatch_running
     # Reset elapsed time to 0 and ensure stopwatch is marked as not running
     elapsed_time = 0
     stopwatch_running = False
     start_time = None  # Also reset start_time to avoid any confusion
+    #ser
+    if ser is not None and ser.is_open:
+        ser.write("RESET\n".encode())
+    else:
+        print("Serial port is not open.")
+
     # Update the display to show the reset state
     update_stopwatch_display()
     stopwatch_display.config(text="Stopwatch: 00:00:00.000")
@@ -179,8 +198,8 @@ def reset_command():
     # Additional reset actions (unrelated to the stopwatch issue)
     config_storage["frequency"] = None
     config_storage["duty_cycle"] = None
-    frequency_scale.set(50)  # Reset slider to a neutral position
-    duty_cycle_scale.set(0)  # Reset slider to a neutral position
+    frequency_scale.set(1700)  # Reset slider to a neutral position
+    duty_cycle_scale.set(30)  # Reset slider to a neutral position
     frequency_entry.delete(0, tk.END)  # Clear the entry box
     duty_cycle_entry.delete(0, tk.END)  # Clear the entry box
     info_frequency_label.config(text="Frequency: -- Hz")
