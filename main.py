@@ -1,6 +1,15 @@
 import tkinter as tk
 import datetime
 import time
+<<<<<<< Updated upstream
+=======
+import serial
+import serial.tools.list_ports
+import sys
+import warnings
+##################################################################################################################################
+ser = None
+>>>>>>> Stashed changes
 
 
 # Flag to control border visibility
@@ -83,6 +92,29 @@ def start_command():
         stopwatch_running = True
         start_time = time.time() - elapsed_time
         update_stopwatch_display()
+<<<<<<< Updated upstream
+=======
+    # Log the start action
+    freq = config_storage.get('frequency', 'N/A')
+    duty_cycle = config_storage.get('duty_cycle', 'N/A')
+    update_data_log('start', freq, duty_cycle)
+
+    #ser
+    if ser is not None and ser.is_open:
+        pulse_chain_list = config_storage.get("pulse_chain", [])
+
+        pulse_chain_str = ','.join(map(str, pulse_chain_list))
+
+        sequence_size = len(pulse_chain_list)
+        frequency = config_storage.get("frequency", 0)
+        duty_cycle = config_storage.get("duty_cycle", 0)
+
+        data_str = f"<{sequence_size},{frequency},{duty_cycle},{pulse_chain_str}>"
+        print(f"Sending to Arduino: {data_str}")
+        ser.write(data_str.encode('utf-8'))
+    else:
+        print("Serial port is not open.")
+>>>>>>> Stashed changes
 
 def stop_command():
     global stopwatch_running, elapsed_time
@@ -107,8 +139,15 @@ def open_presets_list_command():
 
 def load_preset_command():
     pass
+config_storage = {
+    "frequency": None,
+    "duty_cycle": None,
+    "pulse_chain": []
+}
+
+
 def open_pulse_chain_config():
-    new_window = tk.Toplevel(root)
+    new_window = tk.Toplevel()
     new_window.title("Pulse Chain Configuration")
     new_window.geometry("600x400")
 
@@ -123,19 +162,16 @@ def open_pulse_chain_config():
 
     def add_row():
         row_number = len(rows)
-        row_widgets = {}
-
-        entry = tk.Entry(scrollable_frame, width=25, validate='key', validatecommand=validate_command)
+        entry = tk.Entry(scrollable_frame, width=25)
         entry.grid(row=row_number, column=1, padx=10, pady=10)
-        row_widgets['entry'] = entry
 
-        switch_var = tk.BooleanVar()
-        toggle = tk.Checkbutton(scrollable_frame, text="Off", bg="red", variable=switch_var,
-                                onvalue=True, offvalue=False, command=lambda: toggle_switch(toggle, switch_var))
+        toggle_text = "On" if row_number % 2 == 0 else "Off"
+        toggle_bg = "green" if row_number % 2 == 0 else "red"
+        switch_var = tk.BooleanVar(value=(row_number % 2 == 0))
+        toggle = tk.Checkbutton(scrollable_frame, text=toggle_text, bg=toggle_bg, variable=switch_var, state="disabled")
         toggle.grid(row=row_number, column=2, padx=10, pady=10)
-        row_widgets['toggle'] = toggle
 
-        rows.append(row_widgets)
+        rows.append({"entry": entry, "toggle": toggle})
 
     def delete_last_row():
         if rows:
@@ -143,29 +179,13 @@ def open_pulse_chain_config():
             last_row['entry'].destroy()
             last_row['toggle'].destroy()
 
-    def toggle_switch(switch, var):
-        if var.get():
-            switch.config(text="On", bg="green")
-        else:
-            switch.config(text="Off", bg="red")
-
     def close_window():
-        pulse_chain_config = []
-        for row in rows:
-            entry_value = row['entry'].get()  # Get the pulse count from the entry
-            switch_state = row['toggle'].cget('text')
-            # Convert 'On'/'Off' text to a boolean or keep as string based
-            state = True if switch_state == "On" else False
-            # Create a dictionary for the configuration
-            config_entry = {"count": int(entry_value) if entry_value.isdigit() else 0, "state": state}
-            pulse_chain_config.append(config_entry)
+        # Collect valid integer values from entries
+        pulse_chain_values = [int(row['entry'].get()) for row in rows if row['entry'].get().isdigit()]
 
-        # Update the main configuration storage
-        config_storage["pulse_chain"] = pulse_chain_config
-
-        # Update the display, adapting the function to handle the new structure
-        update_pulse_chain_config(config_storage["pulse_chain"])
-
+        # Store as a list of integers directly
+        config_storage["pulse_chain"] = pulse_chain_values
+        print("Pulse Chain Config:", config_storage["pulse_chain"])  # Or update the display accordingly
         new_window.destroy()
 
     add_row_button = tk.Button(scrollable_frame, text="+", command=add_row, width=3, height=2)
@@ -174,20 +194,26 @@ def open_pulse_chain_config():
     delete_row_button = tk.Button(scrollable_frame, text="-", command=delete_last_row, width=3, height=2)
     delete_row_button.grid(row=0, column=4, padx=10, pady=10)
 
-    add_row()  # Add the first row
+    add_row()  # Add the first row automatically
 
-    # Add the Confirm button to the window
     confirm_button = tk.Button(new_window, text="Confirm", command=close_window)
     confirm_button.pack(pady=10)
 
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-
-def update_pulse_chain_config(new_config):
+def update_pulse_chain_config(new_config_str):
     pulse_chain_display.config(state=tk.NORMAL)
     pulse_chain_display.delete(1.0, tk.END)
-    formatted_config = '\n'.join([f"{item['count']} {'on' if item['state'] else 'off'}" for item in new_config])
+
+    # Split the new_config_str by commas to get a list of durations
+    durations = new_config_str.split(", ")
+
+    # Generate the formatted string with alternating "on" and "off" states
+    formatted_config = '\n'.join([
+        f"{durations[i]} {'on' if i % 2 == 0 else 'off'}" for i in range(len(durations))
+    ])
+
     pulse_chain_display.insert(tk.END, formatted_config)
     pulse_chain_display.config(state=tk.DISABLED)
 

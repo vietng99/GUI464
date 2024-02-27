@@ -1,0 +1,72 @@
+import tkinter as tk
+from tkinter import ttk
+import serial
+import serial.tools.list_ports
+import sys
+import warnings  # Make sure to import warnings
+
+def find_arduino_serial_port():
+    arduino_ports = [
+        p.device
+        for p in serial.tools.list_ports.comports()
+        if 'usbmodem' in p.device or 'usbserial' in p.device  # More accurate detection
+    ]
+    if not arduino_ports:
+        raise IOError("No Arduino found - available ports: {}".format([p.device for p in serial.tools.list_ports.comports()]))
+    if len(arduino_ports) > 1:
+        warnings.warn('Multiple Arduinos found - using the first')
+    return arduino_ports[0]
+
+try:
+    serialPort = find_arduino_serial_port()
+    baudRate = 9600
+    ser = serial.Serial(serialPort, baudRate)
+    print(f"Arduino connected on {serialPort}")
+except Exception as e:
+    print(e)
+    sys.exit(1)
+
+def send_to_arduino():
+    sequence_size = sequence_size_var.get()
+    frequency = frequency_var.get()
+    duty_cycle = duty_cycle_var.get()
+    sequence = sequence_var.get()  # Assuming comma-separated input
+    print(f"<{sequence_size},{frequency},{duty_cycle},{sequence}>")
+    data_str = f"<{sequence_size},{frequency},{duty_cycle},{sequence}>"
+    print(f"Sending to Arduino: {data_str}")  # Print the data string before sending
+    ser.write(data_str.encode('utf-8'))
+
+root = tk.Tk()
+root.title("Arduino Input GUI")
+
+sequence_size_var = tk.StringVar()
+frequency_var = tk.StringVar()
+duty_cycle_var = tk.StringVar()
+sequence_var = tk.StringVar()
+
+ttk.Label(root, text="Sequence Size:").grid(column=0, row=0, sticky=tk.W)
+sequence_size_entry = ttk.Entry(root, textvariable=sequence_size_var)
+sequence_size_entry.grid(column=1, row=0)
+
+ttk.Label(root, text="Frequency:").grid(column=0, row=1, sticky=tk.W)
+frequency_entry = ttk.Entry(root, textvariable=frequency_var)
+frequency_entry.grid(column=1, row=1)
+
+ttk.Label(root, text="Duty Cycle:").grid(column=0, row=2, sticky=tk.W)
+duty_cycle_entry = ttk.Entry(root, textvariable=duty_cycle_var)
+duty_cycle_entry.grid(column=1, row=2)
+
+ttk.Label(root, text="Sequence (comma-separated):").grid(column=0, row=3, sticky=tk.W)
+sequence_entry = ttk.Entry(root, textvariable=sequence_var)
+sequence_entry.grid(column=1, row=3)
+
+send_button = ttk.Button(root, text="Send to Arduino", command=send_to_arduino)
+send_button.grid(column=1, row=4, pady=10)
+
+root.mainloop()
+
+# Close the serial port when the GUI is closed
+try:
+    ser.close()
+except:
+    pass  # Handle the case where the serial port might not be open
