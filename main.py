@@ -2,6 +2,9 @@ import tkinter as tk
 import datetime
 import time
 
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 # Flag to control border visibility
 border_visible = False  # Set to False for invisible borders, True for visible
@@ -25,7 +28,19 @@ def update_duty_cycle(value):
     config_storage["duty_cycle"] = float(value)
     # Update the info bar's duty cycle label
     info_duty_cycle_label.config(text=f"Duty Cycle: {value}%")
-
+    
+# Clear the previous graph
+    ax.clear()
+    
+    # Plot the new graph based on the updated duty cycle
+    duty_cycle = float(value)
+    labels = 'Duty Cycle', ''
+    sizes = [duty_cycle, 100-duty_cycle]
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    ax.set_title('Duty Cycle Visualization')
+    
+    # Draw the updated graph
+    canvas.draw()
 
     root.update_idletasks()
 
@@ -70,6 +85,7 @@ def update_stopwatch_display():
         # Schedule the next update
         root.after(10, update_stopwatch_display)
 
+# EDIT LOG WINDOW
 def update_data_log(new_data):
     data_log_window.config(state=tk.NORMAL)
     data_log_window.insert(tk.END, new_data + "\n")
@@ -429,6 +445,13 @@ data_log_window.config(state=tk.DISABLED)
 
 # Example update to data log
 update_data_log("Initial log entry.")
+
+# Create a figure for plotting the duty cycle graph
+figure = plt.Figure(figsize=(6, 5), dpi=100)
+ax = figure.add_subplot(111)  # Adds a subplot to the figure
+canvas = FigureCanvasTkAgg(figure, master=time_frame)  # Assuming you want to place the graph in the time_frame
+canvas.draw()
+canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 
 #Orange frame
