@@ -1,6 +1,7 @@
 import tkinter as tk
 import datetime
 import time
+import numpy as np
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -29,19 +30,26 @@ def update_duty_cycle(value):
     # Update the info bar's duty cycle label
     info_duty_cycle_label.config(text=f"Duty Cycle: {value}%")
     
-# Clear the previous graph
-    ax.clear()
-    
-    # Plot the new graph based on the updated duty cycle
+# Create the duty cycle plot
     duty_cycle = float(value)
-    labels = 'Duty Cycle', ''
-    sizes = [duty_cycle, 100-duty_cycle]
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-    ax.set_title('Duty Cycle Visualization')
+    T = 1.0  # period (arbitrary)
+    t_on = T * (duty_cycle / 100)
+    t_off = T - t_on
+    t = np.array([0, t_on, t_on, T])  # Time points which define the step change
+    signal = np.array([1, 1, 0, 0])  # Signal level
     
+    ax.clear()
+    ax.step(t, signal, where='post')
+    ax.set_ylim(-0.2, 1.2)  # Extend y-axis to make it look clearer
+    ax.set_xlim(0, T)  # Extend x-axis to fit one period T
+    ax.set_title(f'{duty_cycle}% Duty Cycle')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Signal')
+    ax.grid(True)
+
     # Draw the updated graph
     canvas.draw()
-
+    
     root.update_idletasks()
 
 
