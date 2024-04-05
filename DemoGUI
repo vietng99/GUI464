@@ -3,41 +3,47 @@ from tkinter import ttk
 import serial
 import serial.tools.list_ports
 import sys
-import warnings  # Make sure to import warnings
+import warnings
+import time  # Import time for delay
 
-def find_arduino_serial_port():
-    arduino_ports = [
+def find_serial_port():
+    ports = [
         p.device
         for p in serial.tools.list_ports.comports()
-        if 'usbmodem' in p.device or 'usbserial' in p.device  # More accurate detection
     ]
-    if not arduino_ports:
-        raise IOError("No Arduino found - available ports: {}".format([p.device for p in serial.tools.list_ports.comports()]))
-    if len(arduino_ports) > 1:
-        warnings.warn('Multiple Arduinos found - using the first')
-    return arduino_ports[0]
+    if not ports:
+        raise IOError("No compatible device found - available ports: {}".format(
+            [p.device for p in serial.tools.list_ports.comports()]))
+    if len(ports) > 1:
+        warnings.warn('Multiple devices found - using the first')
+    return ports[0]
 
 try:
-    serialPort = find_arduino_serial_port()
+    serialPort = find_serial_port()
     baudRate = 9600
     ser = serial.Serial(serialPort, baudRate)
-    print(f"Arduino connected on {serialPort}")
+    time.sleep(2)  # Delay to ensure the connection is ready
+    print(f"Device connected on {serialPort}")
 except Exception as e:
-    print(e)
+    print(f"Error: {e}")
+    print(f"Details: {e.args}")
     sys.exit(1)
 
-def send_to_arduino():
+def send_to_device():
     sequence_size = sequence_size_var.get()
     frequency = frequency_var.get()
     duty_cycle = duty_cycle_var.get()
-    sequence = sequence_var.get()  # Assuming comma-separated input
-    print(f"<{sequence_size},{frequency},{duty_cycle},{sequence}>")
+    sequence = sequence_var.get()
     data_str = f"<{sequence_size},{frequency},{duty_cycle},{sequence}>"
-    print(f"Sending to Arduino: {data_str}")  # Print the data string before sending
-    ser.write(data_str.encode('utf-8'))
+    print(f"Sending to device: {data_str}")  # Logging the data being sent
+    try:
+        ser.write(data_str.encode('utf-8'))
+    except Exception as e:
+        print(f"Error during send: {e}")
+        print(f"Details: {e.args}")
 
 root = tk.Tk()
-root.title("Arduino Input GUI")
+root.title("Device Input GUI")
 
 sequence_size_var = tk.StringVar()
 frequency_var = tk.StringVar()
@@ -60,13 +66,16 @@ ttk.Label(root, text="Sequence (comma-separated):").grid(column=0, row=3, sticky
 sequence_entry = ttk.Entry(root, textvariable=sequence_var)
 sequence_entry.grid(column=1, row=3)
 
-send_button = ttk.Button(root, text="Send to Arduino", command=send_to_arduino)
+send_button = ttk.Button(root, text="Send to Arduino", command=send_to_device)
 send_button.grid(column=1, row=4, pady=10)
 
-root.mainloop()
+def on_closing():
+    try:
+        ser.close()
+    except Exception as e:
+        print(f"Error on closing: {e}")
+    root.destroy()
 
-# Close the serial port when the GUI is closed
-try:
-    ser.close()
-except:
-    pass  # Handle the case where the serial port might not be open
+root.protocol("WM_DELETE_WINDOW", on_closing)
+
+root.mainloop()
