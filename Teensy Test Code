@@ -30,7 +30,7 @@ void loop()
         parseData();
         newData = false;
     }
-  analogWriteFrequency(4, frequency); //initializes the frequency of the wave
+  analogWriteFrequency(3, frequency); //initializes the frequency of the wave
   analogWrite(3, 0);;//initializes the timer with a duty cycle of 0 (off)
   int n=(sizeof(sequence)/sizeof(sequence[0])); //creates variable for the size of the input sequence
   if(sizeof(sequence)==0){
