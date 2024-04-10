@@ -44,12 +44,12 @@ void loop()
     if(i%2==0){//sets so if sequence is on an even index there will pulses, and if on an odd index there will be a break
       analogWrite(3,floor((dutyCycle/100)*256));//Sets the duty cycle of the timer to be the duty cycle the user input
       delay((int)sequence[i]); //delays for the number of pulses in sequence multiplied by the microseconds per pulse, then divided into ms and us
-      delayMicroseconds((int)((float)sequence[i]-floor(sequence[i]))*1000); //us portion of the delay, delayMicrosecond is only accurate to 16383 us, so easier to have an accurate ms delay and add on the us delay
+      delayMicroseconds((int)(floor(sequence[i])*1000)); //us portion of the delay, delayMicrosecond is only accurate to 16383 us, so easier to have an accurate ms delay and add on the us delay
     }
     else{
       analogWrite(3,0);//sets a break
       delay((int)sequence[i]);//same timing as before
-      delayMicroseconds((int)((float)sequence[i]-floor(sequence[i]))*1000);
+      delayMicroseconds((int)(floor(sequence[i])*1000));
     }
   }
   analogWrite(3,0);
@@ -104,7 +104,7 @@ void parseData() {      // split the data into its parts
     int templen=sequenceSize; //temp variable for indexing
     while(templen>0){//loop that will cobvert all subsequent values in the string into members of the sequence
       strtokIndx = strtok(NULL, ",");     
-      sequence[sequenceSize-templen]=atoi(strtokIndx); //assigns the next part of sequence to be whatever value is next
+      sequence[sequenceSize-templen]=atof(strtokIndx); //assigns the next part of sequence to be whatever value is next
       templen=templen-1;//reduces temp variable to continue down the string
     }
 }
