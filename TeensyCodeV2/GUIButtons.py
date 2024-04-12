@@ -1,18 +1,23 @@
-from TeensyGUI import find_serial_port, run_for_duration, send_to_device, update_serial_ports, change_baud_rate, stop_sequence, reset_parameters, preview_sequence, preview_button
 import tkinter as tk
 from tkinter import ttk
 import serial
-import serial.tools.list_ports
 import threading
-import warnings
-import sys
-import time
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from tkinter import messagebox
+from GUIfunctions import find_serial_port, send_to_device, stop_sequence, reset_parameters, preprocess_sequence
 
+def update_serial_ports():
+    ports = serial.tools.list_ports.comports()
+    port_list = [port.device for port in ports]
+    port_combobox['values'] = port_list
+    if port_list:
+        port_combobox.current(0)
 
-# Main application setup
+def change_baud_rate(event):
+    global ser
+    selected_baud = baud_rate_combobox.get()
+    ser.baudrate = selected_baud
+    print(f"Baud rate changed to: {selected_baud}")
+
+# GUI Setup
 root = tk.Tk()
 root.title("Device Input GUI")
 
@@ -27,8 +32,8 @@ sequence_size_var = tk.StringVar()
 frequency_var = tk.StringVar()
 duty_cycle_var = tk.StringVar()
 sequence_var = tk.StringVar()
+duration_var = tk.StringVar()
 
-# Adjustments to ensure widgets are added to `tab1` using `grid`
 ttk.Label(tab1, text="Sequence Size:").grid(column=0, row=0, sticky=tk.W)
 sequence_size_entry = ttk.Entry(tab1, textvariable=sequence_size_var)
 sequence_size_entry.grid(column=1, row=0)
@@ -45,24 +50,18 @@ ttk.Label(tab1, text="Sequence (comma-separated):").grid(column=0, row=3, sticky
 sequence_entry = ttk.Entry(tab1, textvariable=sequence_var)
 sequence_entry.grid(column=1, row=3)
 
-# Add to the GUI setup
-timer_duration_var = tk.StringVar()
-ttk.Label(tab1, text="Duration (ms):").grid(column=0, row=8, sticky=tk.W)
-timer_duration_entry = ttk.Entry(tab1, textvariable=timer_duration_var)
-timer_duration_entry.grid(column=1, row=8)
+ttk.Label(tab1, text="Duration (s):").grid(column=0, row=4, sticky=tk.W)
+duration_entry = ttk.Entry(tab1, textvariable=duration_var)
+duration_entry.grid(column=1, row=4)
 
+# preview_button = ttk.Button(tab1, text="Preview Sequence", command=preview_sequence)
+# preview_button.grid(column=1, row=4, pady=10)
 
-ttk.Button(tab1, text="Start", command=send_to_device).grid(column=1, row=5, pady=10)
-ttk.Button(tab1, text="Stop/Kill", command=stop_sequence).grid(column=1, row=6)
-ttk.Button(tab1, text="Reset", command=reset_parameters).grid(column=1, row=7)
+ttk.Button(tab1, text="Start", command=lambda: send_to_device(ser, sequence_size_var.get(), frequency_var.get(), duty_cycle_var.get(), sequence_var.get(), duration_var.get())).grid(column=1, row=5)
+ttk.Button(tab1, text="Stop", command=lambda: stop_sequence(ser)).grid(column=1, row=6)
+ttk.Button(tab1, text="Reset", command=lambda: reset_parameters(ser)).grid(column=1, row=7)
 
-# The "Preview Sequence" button also needs to be added to `tab1` using `grid`
-preview_button = ttk.Button(tab1, text="Preview Sequence", command=preview_sequence)
-preview_button.grid(column=1, row=4, pady=10)
-
-
-# Settings Tab
-ttk.Label(tab2, text="Select Serial Port:").grid(column=0, row=0, sticky=tk.W)
+# Settings Tabttk.Label(tab2, text="Select Serial Port:").grid(column=0, row=0, sticky=tk.W)
 port_combobox = ttk.Combobox(tab2)
 port_combobox.grid(column=1, row=0)
 update_serial_ports()
