@@ -73,4 +73,31 @@ baud_rate_combobox.current(0)  # default to 9600
 baud_rate_combobox.grid(column=1, row=1)
 baud_rate_combobox.bind("<<ComboboxSelected>>", change_baud_rate)
 
+# Add Help Tab
+tab3 = ttk.Frame(tab_control)
+tab_control.add(tab3, text='Help')
+tab_control.pack(expand=1, fill="both")
+
+# Help Content
+help_text = """
+Help Guide for Device Input GUI:
+
+- Sequence Size: Enter the number of pulses in your sequence.
+- Frequency: Specify the frequency for the pulse sequence in Hz.
+- Duty Cycle: Enter the duty cycle as a percentage (0-100).
+- Sequence: Input the sequence values as comma-separated numbers. Each number represents the duration of a pulse in milliseconds.
+- Duration: Set the total duration for the sequence execution in seconds.
+- Start Button: Click to send the current configuration and sequence to the Teensy board.
+- Stop Button: Click to stop the current sequence execution immediately.
+- Reset Button: Resets all input fields and the Teensy board to their default states.
+- Serial Port: Select the serial port that your Teensy board is connected to.
+- Baud Rate: Select the baud rate for serial communication. Make sure it matches the Teensy board settings.
+
+Ensure your Teensy board is connected and configured correctly before sending commands.
+"""
+
+help_label = ttk.Label(tab3, text=help_text, justify="left", wraplength=500)
+help_label.pack(padx=10, pady=10)
+
+
 root.mainloop()
