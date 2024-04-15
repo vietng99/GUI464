@@ -44,6 +44,7 @@ void loop() {
       nTime=nTime+sequence[i]; //adds the total number of microseconds in this specific chain to the nTime
       while (nTime>=totalTime){
         analogWrite(3,0);
+        delay(10);
       }
     }
     else{
@@ -53,6 +54,7 @@ void loop() {
       nTime=nTime+sequence[i];
       while (nTime>=totalTime){
         analogWrite(3,0);
+        delay(10);
       }
     }
   }
