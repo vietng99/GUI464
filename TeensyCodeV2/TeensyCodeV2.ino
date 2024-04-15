@@ -9,7 +9,7 @@ float frequency = 0;
 float dutyCycle = 0;
 int sequence[32];  // Ensure this is sized to handle your expected sequence length
 int sequenceSize = 0; //initializes the total sequence size for placement
-int totalTime = 0; //sets the total time it takes in mincroseconds for the pulse chain to complete
+int totalTime = 10; //sets the total time it takes in mincroseconds for the pulse chain to complete
 int nTime = 0; //variable set to add until it is equal to or greater than the totalTime
 
 boolean newData = false;
