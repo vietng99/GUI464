@@ -1,0 +1,91 @@
+import tkinter as tk
+from tkinter import ttk
+import serial
+import serial.tools.list_ports
+import sys
+import warnings
+import time  # Import time for delay
+
+def find_serial_port():
+    ports = [
+        p.device
+        for p in serial.tools.list_ports.comports()
+    ]
+    if not ports:
+        raise IOError("No compatible device found - available ports: {}".format(
+            [p.device for p in serial.tools.list_ports.comports()]))
+    if len(ports) > 1:
+        warnings.warn('Multiple devices found - using the first')
+    return ports[0]
+
+try:
+    serialPort = find_serial_port()
+    baudRate = 9600
+    ser = serial.Serial(serialPort, baudRate)
+    # time.sleep(2)  # Delay to ensure the connection is ready
+    print(f"Device connected on {serialPort}")
+except Exception as e:
+    print(f"Error: {e}")
+    print(f"Details: {e.args}")
+    sys.exit(1)
+
+def preprocess_sequence(sequence):
+    # Split the sequence by commas, convert to float, multiply by 1000, convert to string
+    processed_sequence = ','.join([str(float(num) * 1000) for num in sequence.split(',')])
+    return processed_sequence
+
+def send_to_device():
+    sequence_size = sequence_size_var.get()
+    frequency = frequency_var.get()
+    duty_cycle = duty_cycle_var.get()
+    sequence = sequence_var.get()
+    
+    # Preprocess the sequence to convert numbers
+    processed_sequence = preprocess_sequence(sequence)
+    
+    data_str = f"<{sequence_size},{frequency},{duty_cycle},{processed_sequence}>"
+    print(f"Sending to device: {data_str}")  # Logging the data being sent
+    try:
+        ser.write(data_str.encode('utf-8'))
+    except Exception as e:
+        print(f"Error during send: {e}")
+        print(f"Details: {e.args}")
+
+        
+root = tk.Tk()
+root.title("Device Input GUI")
+
+sequence_size_var = tk.StringVar()
+frequency_var = tk.StringVar()
+duty_cycle_var = tk.StringVar()
+sequence_var = tk.StringVar()
+
+ttk.Label(root, text="Sequence Size:").grid(column=0, row=0, sticky=tk.W)
+sequence_size_entry = ttk.Entry(root, textvariable=sequence_size_var)
+sequence_size_entry.grid(column=1, row=0)
+
+ttk.Label(root, text="Frequency:").grid(column=0, row=1, sticky=tk.W)
+frequency_entry = ttk.Entry(root, textvariable=frequency_var)
+frequency_entry.grid(column=1, row=1)
+
+ttk.Label(root, text="Duty Cycle:").grid(column=0, row=2, sticky=tk.W)
+duty_cycle_entry = ttk.Entry(root, textvariable=duty_cycle_var)
+duty_cycle_entry.grid(column=1, row=2)
+
+ttk.Label(root, text="Sequence (comma-separated):").grid(column=0, row=3, sticky=tk.W)
+sequence_entry = ttk.Entry(root, textvariable=sequence_var)
+sequence_entry.grid(column=1, row=3)
+
+send_button = ttk.Button(root, text="Send to Arduino", command=send_to_device)
+send_button.grid(column=1, row=4, pady=10)
+
+def on_closing():
+    try:
+        ser.close()
+    except Exception as e:
+        print(f"Error on closing: {e}")
+    root.destroy()
+
+root.protocol("WM_DELETE_WINDOW", on_closing)
+
+root.mainloop()
