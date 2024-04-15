@@ -1,0 +1,72 @@
+import tkinter as tk
+from tkinter import ttk
+import serial
+import serial.tools.list_ports
+import sys
+import warnings
+
+def find_serial_port():
+    ports = [p.device for p in serial.tools.list_ports.comports()]
+    if not ports:
+        raise IOError("No compatible device found - available ports: {}".format([p.device for p in serial.tools.list_ports.comports()]))
+    if len(ports) > 1:
+        warnings.warn('Multiple devices found - using the first')
+    return ports[0]
+
+try:
+    serialPort = find_serial_port()
+    baudRate = 9600
+    ser = serial.Serial(serialPort, baudRate)
+    print(f"Device connected on {serialPort}")
+except Exception as e:
+    print(f"Error: {e}")
+    print(f"Details: {e.args}")
+    sys.exit(1)
+
+def preprocess_sequence(sequence):
+    return ','.join([str(float(num) * 1000) for num in sequence.split(',')])
+
+def send_to_device():
+    sequence_size = sequence_size_var.get()
+    frequency = frequency_var.get()
+    duty_cycle = duty_cycle_var.get()
+    sequence = sequence_var.get()
+    duration = duration_var.get()  # Get duration from the GUI
+    
+    processed_sequence = preprocess_sequence(sequence)
+    data_str = f"<{sequence_size},{frequency},{duty_cycle},{duration},{processed_sequence}>"
+    print(f"Sending to device: {data_str}")
+    try:
+        ser.write(data_str.encode('utf-8'))
+    except Exception as e:
+        print(f"Error during send: {e}")
+        print(f"Details: {e.args}")
+
+root = tk.Tk()
+root.title("Device Input GUI")
+
+sequence_size_var = tk.StringVar()
+frequency_var = tk.StringVar()
+duty_cycle_var = tk.StringVar()
+sequence_var = tk.StringVar()
+duration_var = tk.StringVar()  # Create a variable for duration
+
+# Add GUI components
+labels = ["Sequence Size:", "Frequency:", "Duty Cycle:", "Sequence (comma-separated):", "Duration (s):"]
+variables = [sequence_size_var, frequency_var, duty_cycle_var, sequence_var, duration_var]
+for i, (label, var) in enumerate(zip(labels, variables)):
+    ttk.Label(root, text=label).grid(column=0, row=i, sticky=tk.W)
+    ttk.Entry(root, textvariable=var).grid(column=1, row=i)
+
+ttk.Button(root, text="Send to Arduino", command=send_to_device).grid(column=1, row=len(labels), pady=10)
+
+def on_closing():
+    try:
+        ser.close()
+        print("Serial port closed.")
+    except Exception as e:
+        print(f"Error on closing: {e}")
+    root.destroy()
+
+root.protocol("WM_DELETE_WINDOW", on_closing)
+root.mainloop()
