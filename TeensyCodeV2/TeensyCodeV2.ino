@@ -42,9 +42,6 @@ void loop() {
       delay((int)(sequence[i]/1000)); //delays for the number of pulses in sequence multiplied by the microseconds per pulse, then divided into ms and us
       delayMicroseconds((int)((sequence[i])%1000)); //us portion of the delay, delayMicrosecond is only accurate to 16383 us, so easier to have an accurate ms delay and add on the us delay
       nTime=nTime+sequence[i]; //adds the total number of microseconds in this specific chain to the nTime
-      while (nTime>=totalTime){
-        analogWrite(3,0);
-        delay(10);
       }
     }
     else{
@@ -52,10 +49,6 @@ void loop() {
       delay((int)(sequence[i]/1000)); //same timing as before
       delayMicroseconds((int)((sequence[i])%1000));
       nTime=nTime+sequence[i];
-      while (nTime>=totalTime){
-        analogWrite(3,0);
-        delay(10);
-      }
     }
   }
   analogWrite(3,0);
@@ -107,8 +100,9 @@ void parseData() {      // split the data into its parts
     strtokIndx = strtok(NULL, ","); 
     dutyCycle = atof(strtokIndx);     // copy the third part of the string to be the dutyCycle float
     Serial.print("check3");
-    strtokIndx = strtok(NULL, ",");
-    totalTime = atoi(strtokIndx)*1000000;//checks the total time in seconds and multiplies it by 1,000,000 to convert to microseconds
+    strtokIndx = strtok(NULL,",");      // get the first part
+    totalTime = atoi(strtokIndx); //checks the total time in seconds and multiplies it by 1,000,000 to convert to microseconds
+    Serial.print("check4");
     int templen=sequenceSize; //temp variable for indexing
     while(templen>0){//loop that will cobvert all subsequent values in the string into members of the sequence
       strtokIndx = strtok(NULL, ",");     
