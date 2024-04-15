@@ -42,9 +42,8 @@ void loop() {
       delay((int)(sequence[i]/1000)); //delays for the number of pulses in sequence multiplied by the microseconds per pulse, then divided into ms and us
       delayMicroseconds((int)((sequence[i])%1000)); //us portion of the delay, delayMicrosecond is only accurate to 16383 us, so easier to have an accurate ms delay and add on the us delay
       nTime=nTime+sequence[i]; //adds the total number of microseconds in this specific chain to the nTime
-      if (nTime>=totalTime){
+      while (nTime>=totalTime){
         analogWrite(3,0);
-        break;//this will kill the sequence after setting the pulses to off if the nTime value becomes equal to or greater than the totalTime value
       }
     }
     else{
@@ -52,9 +51,8 @@ void loop() {
       delay((int)(sequence[i]/1000)); //same timing as before
       delayMicroseconds((int)((sequence[i])%1000));
       nTime=nTime+sequence[i];
-      if (nTime>=totalTime){
+      while (nTime>=totalTime){
         analogWrite(3,0);
-        break;//same as in the previous sequence in case the totalTime will end during a break
       }
     }
   }
