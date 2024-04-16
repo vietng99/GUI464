@@ -8,9 +8,7 @@ char tempChars[numChars];
 float frequency = 0;
 float dutyCycle = 0;
 int sequence[32];  // Ensure this is sized to handle your expected sequence length
-int sequenceSize = 0; //initializes the total sequence size for placement
-int totalTime = 10; //sets the total time it takes in mincroseconds for the pulse chain to complete
-int nTime = 0; //variable set to add until it is equal to or greater than the totalTime
+int sequenceSize = 0;
 
 boolean newData = false;
 
@@ -41,21 +39,11 @@ void loop() {
       analogWrite(3,floor((dutyCycle/100)*256));//Sets the duty cycle of the timer to be the duty cycle the user input
       delay((int)(sequence[i]/1000)); //delays for the number of pulses in sequence multiplied by the microseconds per pulse, then divided into ms and us
       delayMicroseconds((int)((sequence[i])%1000)); //us portion of the delay, delayMicrosecond is only accurate to 16383 us, so easier to have an accurate ms delay and add on the us delay
-      nTime=nTime+sequence[i]; //adds the total number of microseconds in this specific chain to the nTime
-      while (nTime>=totalTime){
-        analogWrite(3,0);
-        delay(10);
-      }
     }
     else{
       analogWrite(3,0);//sets a break
       delay((int)(sequence[i]/1000)); //same timing as before
       delayMicroseconds((int)((sequence[i])%1000));
-      nTime=nTime+sequence[i];
-      while (nTime>=totalTime){
-        analogWrite(3,0);
-        delay(10);
-      }
     }
   }
   analogWrite(3,0);
@@ -107,9 +95,6 @@ void parseData() {      // split the data into its parts
     strtokIndx = strtok(NULL, ","); 
     dutyCycle = atof(strtokIndx);     // copy the third part of the string to be the dutyCycle float
     Serial.print("check3");
-    strtokIndx = strtok(NULL,",");      // get the first part
-    totalTime = atoi(strtokIndx); //checks the total time in seconds and multiplies it by 1,000,000 to convert to microseconds
-    Serial.print("check4");
     int templen=sequenceSize; //temp variable for indexing
     while(templen>0){//loop that will cobvert all subsequent values in the string into members of the sequence
       strtokIndx = strtok(NULL, ",");     
