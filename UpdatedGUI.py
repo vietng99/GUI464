@@ -389,7 +389,7 @@ def update_pulse_chain_config(new_config_str):
 
 
     formatted_config = '\n'.join([
-        f"{durations[i]*1000} {'on' if i % 2 == 0 else 'off'}" for i in range(len(durations))
+        f"{durations[i]} {'on' if i % 2 == 0 else 'off'}" for i in range(len(durations))
     ])
 
 
@@ -411,7 +411,7 @@ def display_pulse_chain():
         for i, value in enumerate(pulse_chain):
             state = 'on' if i % 2 == 0 else 'off'
             tag = 'on_tag' if state == 'on' else 'off_tag'
-            formatted_value = f"{value*1000} {state}\n"
+            formatted_value = f"{value} {state}\n"
             pulse_chain_display.insert(tk.END, formatted_value, tag)
 
     pulse_chain_display.config(state=tk.DISABLED)
