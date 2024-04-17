@@ -257,6 +257,9 @@ def stop_command():
     # Stop the timer countdown
     timer_seconds = 0  # Ensures the countdown loop exits
 
+    config_storage["frequency"] = None
+    config_storage["duty_cycle"] = None
+
     # Existing functionality to send the stop signal to the device
     if ser is not None and ser.is_open:
         try:
@@ -285,8 +288,6 @@ def stop_command():
         else:
             print("No available COM ports found for reconnection.")
 
-    config_storage["frequency"] = None
-    config_storage["duty_cycle"] = None
 
     # Log the stop action
     freq = config_storage.get('frequency', 'N/A')
@@ -300,6 +301,9 @@ def reset_command():
     stopwatch_running = False
     start_time = None
     timer_seconds = 0  # Reset the timer duration
+
+    config_storage["frequency"] = None
+    config_storage["duty_cycle"] = None
 
     # Existing functionality to send the reset signal to the device
     if ser is not None and ser.is_open:
@@ -334,8 +338,7 @@ def reset_command():
     update_timer_display()  # Reset the timer display to 00:00:00:000
 
     # Reset actions for frequency and duty cycle
-    config_storage["frequency"] = None
-    config_storage["duty_cycle"] = None
+
     frequency_scale.set(1700)  # Reset slider to a neutral position
     duty_cycle_scale.set(30)  # Reset slider to a neutral position
     frequency_entry.delete(0, tk.END)  # Clear the entry box
@@ -465,7 +468,7 @@ def display_pulse_chain():
         for i, value in enumerate(pulse_chain):
             state = 'on' if i % 2 == 0 else 'off'
             tag = 'on_tag' if state == 'on' else 'off_tag'
-            formatted_value = f"{value} ms {state} \n"
+            formatted_value = f"{value/1000} ms {state} \n"
             pulse_chain_display.insert(tk.END, formatted_value, tag)
 
     pulse_chain_display.config(state=tk.DISABLED)
