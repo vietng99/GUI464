@@ -465,7 +465,7 @@ def display_pulse_chain():
         for i, value in enumerate(pulse_chain):
             state = 'on' if i % 2 == 0 else 'off'
             tag = 'on_tag' if state == 'on' else 'off_tag'
-            formatted_value = f"{value} {state} ms\n"
+            formatted_value = f"{value} ms {state} \n"
             pulse_chain_display.insert(tk.END, formatted_value, tag)
 
     pulse_chain_display.config(state=tk.DISABLED)
