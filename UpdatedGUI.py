@@ -70,7 +70,7 @@ def update_frequency(value):
 def update_duty_cycle(value):
     global ser  # Ensure ser is accessible globally
     config_storage["duty_cycle"] = int(value)
-    info_duty_cycle_label.config(text=f"Duty Cycle: {value}ms")
+    info_duty_cycle_label.config(text=f"Duty Cycle: {value}%")
     update_data_log("Duty Cycle Updated", freq=config_storage.get('frequency', 'N/A'), duty_cycle=value)
     root.update_idletasks()
     command = f"DUTY:{value}\n"
@@ -111,13 +111,14 @@ def refresh_window():
     root.update()
     display_pulse_chain()
 
+
 def refresh_info_bar():
     # Assuming current_com_port and current_baud_rate are updated elsewhere in your application
     global current_com_port, current_baud_rate
 
     # Update the info bar labels with the latest values from config_storage or other state variables
     info_frequency_label.config(text=f"Frequency: {config_storage.get('frequency', '--')} Hz")
-    info_duty_cycle_label.config(text=f"Duration: {config_storage.get('duty_cycle', '--')}ms")
+    info_duty_cycle_label.config(text=f"Duration: {config_storage.get('duty_cycle', '--')}%")
     info_current_runtime_label.config(text=f"Current Runtime: {config_storage.get('current_runtime', '--')}")
     info_expected_runtime_label.config(text=f"Expected Runtime: {config_storage.get('expected_runtime', '--')}")
     #info_preset_name_label.config(text=f"Preset: {config_storage.get('preset_name', 'None')}")
@@ -178,7 +179,7 @@ def update_data_log(action, freq='N/A', duty_cycle='N/A'):
     data_log_window.insert(tk.END, f"{indent}Frequency=", "action")
     data_log_window.insert(tk.END, f"{freq}Hz, ", "frequency")
     data_log_window.insert(tk.END, "Duration=", "action")
-    data_log_window.insert(tk.END, f"{duty_cycle}ms\n", "duty_cycle")
+    data_log_window.insert(tk.END, f"{duty_cycle}%\n", "duty_cycle")
     data_log_window.config(state=tk.DISABLED)
 
     # Ensure the scrollbar moves down to show the latest entry
@@ -230,10 +231,9 @@ def start_command():
         except serial.SerialException as e:
             print(f"Error during send: {e}")
             print(f"Details: {e.args}")
-            # Optionally, handle reconnection or inform user
+
     else:
         print("Serial port is not open. Attempting to reconnect...")
-        # Attempt to automatically reconnect if possible
         selected_com_port = auto_connect()
         if selected_com_port:
             try:
@@ -259,9 +259,34 @@ def stop_command():
 
     # Existing functionality to send the stop signal to the device
     if ser is not None and ser.is_open:
-        ser.write("STOP\n".encode())
+        try:
+            pulse_chain_list = config_storage.get("pulse_chain", [])
+            pulse_chain_str = ','.join(map(str, pulse_chain_list))
+            sequence_size = len(pulse_chain_list)
+            frequency = config_storage.get("frequency", 0)
+            duty_cycle = config_storage.get("duty_cycle", 0)
+            data_str = f"<{sequence_size},{frequency},{duty_cycle},{pulse_chain_str}>"
+            print(f"Sending to device: {data_str}")
+            ser.write(data_str.encode('utf-8'))
+        except serial.SerialException as e:
+            print(f"Error during send: {e}")
+            print(f"Details: {e.args}")
+
     else:
-        print("Serial port is not open.")
+        print("Serial port is not open. Attempting to reconnect...")
+        selected_com_port = auto_connect()
+        if selected_com_port:
+            try:
+                ser = serial.Serial(selected_com_port, 9600, timeout=1)
+                print("Reconnection successful.")
+            except serial.SerialException as e:
+                print(f"Failed to reconnect: {e}")
+                print(f"Details: {e.args}")
+        else:
+            print("No available COM ports found for reconnection.")
+
+    config_storage["frequency"] = None
+    config_storage["duty_cycle"] = None
 
     # Log the stop action
     freq = config_storage.get('frequency', 'N/A')
@@ -278,9 +303,31 @@ def reset_command():
 
     # Existing functionality to send the reset signal to the device
     if ser is not None and ser.is_open:
-        ser.write("RESET\n".encode())
+        try:
+            pulse_chain_list = config_storage.get("pulse_chain", [])
+            pulse_chain_str = ','.join(map(str, pulse_chain_list))
+            sequence_size = len(pulse_chain_list)
+            frequency = config_storage.get("frequency", 0)
+            duty_cycle = config_storage.get("duty_cycle", 0)
+            data_str = f"<{sequence_size},{frequency},{duty_cycle},{pulse_chain_str}>"
+            print(f"Sending to device: {data_str}")
+            ser.write(data_str.encode('utf-8'))
+        except serial.SerialException as e:
+            print(f"Error during send: {e}")
+            print(f"Details: {e.args}")
+
     else:
-        print("Serial port is not open.")
+        print("Serial port is not open. Attempting to reconnect...")
+        selected_com_port = auto_connect()
+        if selected_com_port:
+            try:
+                ser = serial.Serial(selected_com_port, 9600, timeout=1)
+                print("Reconnection successful.")
+            except serial.SerialException as e:
+                print(f"Failed to reconnect: {e}")
+                print(f"Details: {e.args}")
+        else:
+            print("No available COM ports found for reconnection.")
 
     update_stopwatch_display()
     stopwatch_display.config(text="Stopwatch: 00:00:00.000")
@@ -298,6 +345,8 @@ def reset_command():
     update_data_log("Reset", freq="N/A", duty_cycle="N/A")
 
     root.update_idletasks()
+    refresh_window()
+
 
 
 def open_pulse_chain_config():
@@ -416,7 +465,7 @@ def display_pulse_chain():
         for i, value in enumerate(pulse_chain):
             state = 'on' if i % 2 == 0 else 'off'
             tag = 'on_tag' if state == 'on' else 'off_tag'
-            formatted_value = f"{value} {state}\n"
+            formatted_value = f"{value} {state} ms\n"
             pulse_chain_display.insert(tk.END, formatted_value, tag)
 
     pulse_chain_display.config(state=tk.DISABLED)
@@ -799,7 +848,7 @@ duty_cycle_entry = tk.Entry(config_frame, width=7, validate='key', validatecomma
 duty_cycle_entry.place(x=360, y=110)
 duty_cycle_entry.bind("<Return>", lambda event: update_slider_from_entry(duty_cycle_entry, duty_cycle_scale) or update_duty_cycle(duty_cycle_entry.get()))
 
-duty_cycle_unit_label = tk.Label(config_frame, text="ms")
+duty_cycle_unit_label = tk.Label(config_frame, text="%")
 duty_cycle_unit_label.place(x=400, y=110)
 
 duty_cycle_entry.bind("<Return>", on_duty_cycle_entry_change)
