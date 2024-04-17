@@ -419,10 +419,10 @@ def display_pulse_chain():
 
 
 def validate_entry_input(P):
-    # Allow only numeric input
-    if P.isdigit() or P == "":
+    if P.replace('.', '', 1).isdigit() or P == "":
         return True
     return False
+
 
 def update_entry_from_slider(slider, entry):
     entry.delete(0, tk.END)
