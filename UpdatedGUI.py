@@ -51,7 +51,7 @@ config_storage = {
 
 def update_frequency(value):
     global ser  # Ensure ser is accessible globally
-    config_storage["frequency"] = float(value)
+    config_storage["frequency"] = int(value)
     info_frequency_label.config(text=f"Frequency: {value} Hz")
     update_data_log("Frequency Updated", freq=value, duty_cycle=config_storage.get('duty_cycle', 'N/A'))
     root.update_idletasks()
@@ -69,7 +69,7 @@ def update_frequency(value):
 
 def update_duty_cycle(value):
     global ser  # Ensure ser is accessible globally
-    config_storage["duty_cycle"] = float(value)
+    config_storage["duty_cycle"] = int(value)
     info_duty_cycle_label.config(text=f"Duty Cycle: {value}ms")
     update_data_log("Duty Cycle Updated", freq=config_storage.get('frequency', 'N/A'), duty_cycle=value)
     root.update_idletasks()
@@ -335,7 +335,7 @@ def open_pulse_chain_config():
 
     def close_window():
 
-        pulse_chain_values = [int(row['entry'].get()) for row in rows if row['entry'].get().isdigit()]
+        pulse_chain_values = [int(row['entry'].get())*1000 for row in rows if row['entry'].get().isdigit()]
 
 
         config_storage["pulse_chain"] = pulse_chain_values
@@ -407,11 +407,11 @@ def display_pulse_chain():
         pulse_chain_display.tag_configure('on_tag', foreground='green')
         pulse_chain_display.tag_configure('off_tag', foreground='red')
 
-   
+
         for i, value in enumerate(pulse_chain):
             state = 'on' if i % 2 == 0 else 'off'
             tag = 'on_tag' if state == 'on' else 'off_tag'
-            formatted_value = f"{value} {state}\n"
+            formatted_value = f"{value*1000} {state}\n"
             pulse_chain_display.insert(tk.END, formatted_value, tag)
 
     pulse_chain_display.config(state=tk.DISABLED)
@@ -805,7 +805,7 @@ pulse_chain_button = tk.Button(config_frame, text="Pulse Chain Config", command=
 pulse_chain_button.place(x=10, y=160)
 
 # Pulse Chain Configuration Display
-pulse_chain_display = tk.Text(config_frame, height=10, width=10, wrap='word', state=tk.DISABLED)
+pulse_chain_display = tk.Text(config_frame, height=10, width=15, wrap='word', state=tk.DISABLED)
 pulse_chain_display.place(x=10, y=200)
 
 
