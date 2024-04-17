@@ -334,12 +334,17 @@ def open_pulse_chain_config():
             last_row['toggle'].destroy()
 
     def close_window():
-
-        pulse_chain_values = [int(row['entry'].get())*1000 for row in rows if row['entry'].get().isdigit()]
-
+        pulse_chain_values = []
+        for row in rows:
+            entry_value = row['entry'].get()
+            try:
+                value = int(float(entry_value) * 1000)
+                pulse_chain_values.append(value)
+            except ValueError:
+                print(f"Ignoring non-numeric input: {entry_value}")
 
         config_storage["pulse_chain"] = pulse_chain_values
-        print("Pulse Chain Config:", config_storage["pulse_chain"])  # Or update the display accordingly
+        print("Pulse Chain Config:", config_storage["pulse_chain"])
         new_window.destroy()
 
     add_row_button = tk.Button(scrollable_frame, text="+", command=add_row, width=3, height=2)
@@ -411,7 +416,7 @@ def display_pulse_chain():
         for i, value in enumerate(pulse_chain):
             state = 'on' if i % 2 == 0 else 'off'
             tag = 'on_tag' if state == 'on' else 'off_tag'
-            formatted_value = f"{value*1000} {state}\n"
+            formatted_value = f"{value} {state}\n"
             pulse_chain_display.insert(tk.END, formatted_value, tag)
 
     pulse_chain_display.config(state=tk.DISABLED)
