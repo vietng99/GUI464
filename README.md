@@ -1,12 +1,24 @@
 # Electronic Model and Laser Interface
 
 ## Overview
-This project provides a complete solution for interfacing an electronic model with a laser unit. The system includes a Python-based software application and firmware for the Teensy board, enabling precise control over the laser's pulse width modulation (PWM) parameters.
+This project provides an innovative solution for interfacing an electronic model with a laser unit for precision control applications. The system leverages a Python-based software application and custom firmware for the Teensy board to allow users to adjust the pulse width modulation (PWM) parameters, enabling highly specific control over laser operations. This setup is ideal for applications in scientific research, industrial processes, and hobbyist projects where precise laser modulation is required.
 
 ## Features
-- **Direct Interface**: Easily connect the electronic model to any computer via USB.
-- **Customizable PWM Settings**: Adjust the PWM parameters to suit specific requirements using our intuitive software interface.
-- **Plug-and-Play**: No assembly required, with minimal setup needed to get started.
+- **Direct Interface**: Connect the electronic model to any computer via USB for easy communication.
+- **Customizable PWM Settings**: Adjust the PWM parameters through a user-friendly software interface to meet diverse application needs.
+- **Plug-and-Play**: Minimal setup required, designed to be operational right out of the box.
+
+## Algorithms Used and Developed
+### Teensy Microcontroller Firmware (TeensyCodeV3.ino)
+- **Serial Data Parsing**: Parses incoming serial data to configure the device settings.
+- **PWM Control**: Dynamically adjusts PWM frequency and duty cycle based on user input.
+- **Sequence Management**: Executes defined sequences of PWM outputs to control the laser in precise patterns.
+
+### Python Application (Main_finalized.py)
+- **GUI Management**: Provides a comprehensive user interface using Tkinter for easy interaction and operation control.
+- **Real-Time Data Visualization**: Integrates plotting tools for real-time monitoring and control adjustments.
+- **Serial Communication**: Handles communication with the Teensy microcontroller, sending configuration data and receiving operation feedback.
+- **Concurrency Management**: Utilizes threading to manage multiple operations simultaneously, ensuring smooth system performance.
 
 ## Installation and Setup
 
