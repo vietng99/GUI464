@@ -39,5 +39,3 @@ This BOM reflects the materials required for the production of a beta version of
 2. Connect the USB-C cable to Teensy and the PC.
 3. Ensure firmware (`TeensyCodeV3.ino`) is uploaded via the Arduino IDE.
 
-## Significant References
-(Data sheets, application notes, and relevant technical resources)
