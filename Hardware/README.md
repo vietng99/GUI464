@@ -28,7 +28,8 @@ This BOM reflects the materials required for the production of a beta version of
 
 
 ## Schematics
-(Include PDFs and source files of all schematic diagrams)
+![image](https://github.com/vietng99/GUI464/assets/91101287/52ce51e1-affd-4d3f-a919-c782a5efa982)
+
 
 ## Power Requirements
 - **Voltage**: 3.3V from Teensy
