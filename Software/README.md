@@ -62,7 +62,8 @@ The architecture of EMLI is meticulously crafted with modularity and scalability
   
 This holistic architectural approach ensures that EMLI remains robust and user-friendly, capable of supporting a diverse array of electronic measurement and monitoring tasks while maintaining ease of use and flexibility.
 ### Flow Chart
-(Include a flow chart showing the dependencies between these modules)
+![image](https://github.com/vietng99/GUI464/assets/91101287/f944991a-652b-4f7a-b7a8-d2e99a267ec1)
+
 
 
 
