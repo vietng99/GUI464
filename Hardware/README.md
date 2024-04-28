@@ -87,4 +87,6 @@ Additional memory expansion is possible through two new solder pads on the botto
 - **Teensy 4.1 does not come with pre-soldered headers, a USB cable, or a hub**, requiring additional purchases and assembly for many projects.
 - **Extensive Community Support**: Documentation, tutorials, and a robust community can be found on the Teensy forums and the main website, which also includes detailed technical resources and guides.
 
+### Data Sheet
+Teensy 4.1: https://www.pjrc.com/store/teensy41.html 
 
