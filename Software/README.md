@@ -64,6 +64,7 @@ This holistic architectural approach ensures that EMLI remains robust and user-f
 ### Flow Chart
 ![image](https://github.com/vietng99/GUI464/assets/91101287/f944991a-652b-4f7a-b7a8-d2e99a267ec1)
 
+![image](https://github.com/vietng99/GUI464/assets/91101287/3c5f47e9-bfa1-414e-aaf1-c24d3c632f9f)
 
 
 
