@@ -32,7 +32,7 @@ This BOM reflects the materials required for the production of a beta version of
 
 ## Power Requirements
 - **Voltage**: 3.3V from Teensy
-- **Current**: Approximately 29 mA
+- **Current**: Approximately 75 mA
 
 ## Assembly Instructions
 1. Assemble the Teensy on the breadboard as per the schematic.
