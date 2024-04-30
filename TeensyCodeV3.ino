@@ -10,7 +10,7 @@ float dutyCycle = 0;
 int sequence[32];  // Ensure this is sized to handle your expected sequence length
 int sequenceSize = 0;
 
-int threshold=341;
+int threshold=850;
 int val;
 
 boolean newData = false;
@@ -21,6 +21,7 @@ void setup() {
 }
 
 void loop() {
+
     recvWithStartEndMarkers();
     if (newData == true) {
         strcpy(tempChars, receivedChars);
@@ -28,14 +29,6 @@ void loop() {
         Serial.println("Data Received and Parsed");  // Acknowledgment message
         newData = false;
     }
-
-  val=analogRead(A8);
-    while(val<threshold){
-      analogWrite(3, 0);
-      val=analogRead(A8);
-      delay(1);
-    }
-    threshold=-1;
     
   analogWriteFrequency(3, frequency); //initializes the frequency of the wave
   analogWrite(3, 0);//initializes the timer with a duty cycle of 0 (off)
@@ -70,6 +63,13 @@ void recvWithStartEndMarkers() {
     char rc;
 
     while (Serial.available() > 0 && newData == false) {
+      val=analogRead(A8);
+      while (val<threshold)
+        {
+          analogWrite(3,0);
+          delay(1);
+          val=analogRead(A8);
+        }
         rc = Serial.read();
 
         if (recvInProgress == true) {
